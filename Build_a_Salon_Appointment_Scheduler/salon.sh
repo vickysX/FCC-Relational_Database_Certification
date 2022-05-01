@@ -11,10 +11,8 @@ VOGUE_MENU() {
     echo -e "$1"
   fi
   SERVICES=$($PSQL "SELECT service_id, name FROM services ORDER BY service_id")
-  echo "$SERVICES" | sed -r 's/\|/ \| /g' | while read SERVICE_ID BAR TREATMENT
-  do
-    echo "$SERVICE_ID) $TREATMENT"
-  done
+  echo "$SERVICES" | sed -r 's/\|/) /' 
+  
   TAKE_APPOINTMENT
 }
 
@@ -37,11 +35,13 @@ TAKE_APPOINTMENT() {
     fi
     echo -e "\nWhat time would you like to book your $SERVICE?"
     read SERVICE_TIME
-    # for inputs like 11am or 3pm
     if [[ $SERVICE_TIME =~ am ]]
     then
-      SERVICE_TIME=$(echo $SERVICE_TIME | sed -r 's/am/:00/g')
-      
+      SERVICE_TIME=$(echo $SERVICE_TIME | sed -r 's/am//g')
+      if [[ ! $SERVICE_TIME =~ :[0-9]+$ ]]
+      then
+        SERVICE_TIME=$(echo SERVICE_TIME | sed -r 's/$/:00$/g')
+      fi
     elif [[ $SERVICE_TIME =~ pm ]]
     then
       SERVICE_TIME=$(echo $SERVICE_TIME | sed -r '/s/pm//g')
